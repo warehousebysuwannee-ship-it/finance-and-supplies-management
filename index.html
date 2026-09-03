@@ -444,6 +444,7 @@ const DB = {
         paying:        !!r.paying,         payingDate:    r.paying_date || '',
         prepPay:       !!r.prep_pay,       prepPayDate:   r.prep_pay_date || '',
         paid:          !!r.paid,           paidDate:      r.paid_date || '',
+        bankName:      r.bank_name || '',
       }
     };
   },
@@ -492,6 +493,7 @@ const DB = {
       paying:          !!s.paying,        paying_date:    s.payingDate || '',
       prep_pay:        !!s.prepPay,       prep_pay_date:  s.prepPayDate || '',
       paid:            !!s.paid,          paid_date:      s.paidDate || '',
+      bank_name:       s.bankName || '',
     };
   },
 
@@ -3080,6 +3082,31 @@ if (!isNew) {
       <label for="f-paid">✅ จ่ายเงินแล้ว</label>
     </div>
     <div class="form-field">
+      <label>ธนาคาร</label>
+      <select id="f-bank-name" ${!canS9 ? 'disabled':''}>
+        <option value="">- เลือกธนาคาร -</option>
+        <option value="ธนาคารกรุงเทพ" ${s.bankName==='ธนาคารกรุงเทพ'?'selected':''}>ธนาคารกรุงเทพ</option>
+        <option value="ธนาคารกสิกรไทย" ${s.bankName==='ธนาคารกสิกรไทย'?'selected':''}>ธนาคารกสิกรไทย</option>
+        <option value="ธนาคารกรุงไทย" ${s.bankName==='ธนาคารกรุงไทย'?'selected':''}>ธนาคารกรุงไทย</option>
+        <option value="ธนาคารทหารไทยธนชาต" ${s.bankName==='ธนาคารทหารไทยธนชาต'?'selected':''}>ธนาคารทหารไทยธนชาต (ทีทีบี)</option>
+        <option value="ธนาคารไทยพาณิชย์" ${s.bankName==='ธนาคารไทยพาณิชย์'?'selected':''}>ธนาคารไทยพาณิชย์</option>
+        <option value="ธนาคารกรุงศรีอยุธยา" ${s.bankName==='ธนาคารกรุงศรีอยุธยา'?'selected':''}>ธนาคารกรุงศรีอยุธยา</option>
+        <option value="ธนาคารเกียรตินาคินภัทร" ${s.bankName==='ธนาคารเกียรตินาคินภัทร'?'selected':''}>ธนาคารเกียรตินาคินภัทร</option>
+        <option value="ธนาคารซีไอเอ็มบี ไทย" ${s.bankName==='ธนาคารซีไอเอ็มบี ไทย'?'selected':''}>ธนาคารซีไอเอ็มบี ไทย</option>
+        <option value="ธนาคารทิสโก้" ${s.bankName==='ธนาคารทิสโก้'?'selected':''}>ธนาคารทิสโก้</option>
+        <option value="ธนาคารธนชาต" ${s.bankName==='ธนาคารธนชาต'?'selected':''}>ธนาคารธนชาต</option>
+        <option value="ธนาคารยูโอบี" ${s.bankName==='ธนาคารยูโอบี'?'selected':''}>ธนาคารยูโอบี</option>
+        <option value="ธนาคารแลนด์ แอนด์ เฮ้าส์" ${s.bankName==='ธนาคารแลนด์ แอนด์ เฮ้าส์'?'selected':''}>ธนาคารแลนด์ แอนด์ เฮ้าส์</option>
+        <option value="ธนาคารไอซีบีซี (ไทย)" ${s.bankName==='ธนาคารไอซีบีซี (ไทย)'?'selected':''}>ธนาคารไอซีบีซี (ไทย)</option>
+        <option value="ธนาคารออมสิน" ${s.bankName==='ธนาคารออมสิน'?'selected':''}>ธนาคารออมสิน</option>
+        <option value="ธนาคารอาคารสงเคราะห์" ${s.bankName==='ธนาคารอาคารสงเคราะห์'?'selected':''}>ธนาคารอาคารสงเคราะห์ (ธอส.)</option>
+        <option value="ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร" ${s.bankName==='ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร'?'selected':''}>ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร (ธ.ก.ส.)</option>
+        <option value="ธนาคารอิสลามแห่งประเทศไทย" ${s.bankName==='ธนาคารอิสลามแห่งประเทศไทย'?'selected':''}>ธนาคารอิสลามแห่งประเทศไทย</option>
+        <option value="ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย" ${s.bankName==='ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย'?'selected':''}>ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย (SME D Bank)</option>
+        <option value="ธนาคารเพื่อการส่งออกและนำเข้าแห่งประเทศไทย" ${s.bankName==='ธนาคารเพื่อการส่งออกและนำเข้าแห่งประเทศไทย'?'selected':''}>ธนาคารเพื่อการส่งออกและนำเข้าแห่งประเทศไทย (EXIM Bank)</option>
+      </select>
+    </div>
+    <div class="form-field">
       <label>วันที่/เวลาจ่ายเงินแล้ว <span style="color:var(--gray-500);font-weight:400">(อัตโนมัติ)</span></label>
       <input type="text" id="f-paid-date" value="${s.paidDate || ''}" readonly>
     </div>
@@ -3139,7 +3166,7 @@ function renderTimeline(d) {
     ...(showGfmis   ? [{ key:'gfmisProgress', label:'อยู่ระหว่างการเบิกจ่ายในระบบ GFMIS', done:!!s.gfmisInProgress, date:s.gfmisInProgressDate, role:'ผู้รับผิดชอบ GFMIS' }] : []),
     ...(showGfmis   ? [{ key:'gfmis',   label:'ดำเนินการเบิกจ่าย GFMIS แล้ว', done:!!s.gfmisStep, date:s.gfmisDate, role:'ผู้รับผิดชอบ GFMIS' }] : []),
     { key:'prepPay',    label:'รับฎีกา-เตรียมจ่าย',        done:!!s.prepPay,       date:s.prepPayDate,     role:'ผู้รับผิดชอบเบิกจ่าย' },
-    { key:'paid',       label:'จ่ายเงินแล้ว',              done:!!s.paid,          date:s.paidDate,        role:'ผู้รับผิดชอบเบิกจ่าย' },
+    { key:'paid',       label: s.bankName ? `จ่ายเงินแล้ว (ธนาคาร${s.bankName.replace(/^ธนาคาร/,'')})` : 'จ่ายเงินแล้ว', done:!!s.paid,          date:s.paidDate,        role:'ผู้รับผิดชอบเบิกจ่าย' },
     { key:'cancel',     label:'ยกเลิก',                   done:!!d.cancel,        date:d.cancelDate,      role:'เจ้าหน้าที่หน่วยงาน' },
   ];
 
@@ -3204,6 +3231,7 @@ function syncFormToStatusDraft(d) {
   if (chk('f-gfmis-progress') !== undefined) { s.gfmisInProgress = chk('f-gfmis-progress'); s.gfmisInProgressDate = val('f-gfmis-progress-date'); }
   if (chk('f-gfmis')      !== undefined) { s.gfmisStep  = chk('f-gfmis');      s.gfmisDate      = val('f-gfmis-date'); }
   if (chk('f-paid')       !== undefined) { s.paid       = chk('f-paid');       s.paidDate       = val('f-paid-date'); }
+  if (val('f-bank-name')  !== undefined) { s.bankName   = val('f-bank-name'); }
   if (chk('f-prep-pay')   !== undefined) { s.prepPay    = chk('f-prep-pay');   s.prepPayDate    = val('f-prep-pay-date'); }
   if (chk('f-doc-return') !== undefined) { d.docReturnDate = chk('f-doc-return') ? (val('f-doc-return-date') || nowTH()) : ''; }
   if (chk('f-cancel')     !== undefined) { d.cancel = chk('f-cancel'); d.cancelDate = chk('f-cancel') ? (val('f-cancel-date') || nowTH()) : ''; }
@@ -4095,7 +4123,7 @@ async function saveDikha() {
         gfmisInProgress:false,gfmisInProgressDate:'',
         gfmisStep:false,gfmisDate:'',gfmisBudget:'',
         paying:false,payingDate:'',
-        paid:false,paidDate:'',
+        paid:false,paidDate:'',bankName:'',
         cancelled:false,cancelDate:''
       }
     };
@@ -5949,7 +5977,7 @@ function exportExcel() {
     'GFMIS','วันที่/เวลา GFMIS',
     'รับฎีกา-เตรียมจ่าย','วันที่/เวลารับฎีกา-เตรียมจ่าย',
     'อยู่ระหว่างการจ่าย','วันที่/เวลาอยู่ระหว่างการจ่าย',
-    'จ่ายเงินแล้ว','วันที่/เวลาจ่ายเงิน',
+    'จ่ายเงินแล้ว','วันที่/เวลาจ่ายเงิน','ธนาคาร',
     // เพิ่มเติม
     'รับเอกสารส่งคืนแก้ไข','วันที่/เวลารับเอกสารส่งคืน',
     'ยกเลิก','วันที่/เวลายกเลิก','เหตุผลยกเลิก',
@@ -5978,7 +6006,7 @@ function exportExcel() {
       bool(s.gfmisStep), s.gfmisDate||'-',
       bool(s.prepPay), s.prepPayDate||'-',
       bool(s.paying), s.payingDate||'-',
-      bool(s.paid), s.paidDate||'-',
+      bool(s.paid), s.paidDate||'-', s.bankName||'-',
       bool(d.docReturnDate), d.docReturnDate||'-',
       bool(d.cancel), d.cancelDate||'-', d.cancelReason||'-',
       d.note||'-'

@@ -1030,9 +1030,9 @@ const DB = {
     min-width: 0;
   }
   .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,30,60,0.14); }
-  .stat-label { font-size: 14px; color: var(--gray-500); font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .stat-value { font-size: 32px; font-weight: 700; color: var(--navy); line-height: 1; }
-  .stat-sub { font-size: 13px; color: var(--gray-500); margin-top: 6px; }
+  .stat-label { font-size: 15.5px; color: var(--gray-500); font-weight: 700; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-value { font-size: 34px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .stat-sub { font-size: 14.5px; color: var(--gray-500); margin-top: 6px; }
   .stat-card.blue { border-left-color: var(--blue); }
   .stat-card.green { border-left-color: var(--green); }
   .stat-card.orange { border-left-color: var(--orange); }
@@ -1079,7 +1079,7 @@ const DB = {
   }
 
   #tab-dashboard .filters { align-items: center; }
-  #tab-dashboard .filter-label { text-transform: uppercase; letter-spacing: .4px; font-size: 11px; }
+  #tab-dashboard .filter-label { text-transform: uppercase; letter-spacing: .4px; font-size: 14px; }
   #tab-dashboard .filter-group select { min-width: 170px; }
 
   /* การ์ดสถิติ: ไอคอนวงกลมมุมขวาบน + ตัวเลขแบบตัวเลขตาราง (tabular) */
@@ -1090,7 +1090,7 @@ const DB = {
     display: flex; align-items: center; justify-content: center;
     font-size: 17px;
   }
-  #tab-dashboard .stat-label { text-transform: uppercase; letter-spacing: .5px; font-size: 11.5px; }
+  #tab-dashboard .stat-label { text-transform: uppercase; letter-spacing: .5px; font-size: 14px; }
   #tab-dashboard .stat-value { font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
 
   /* การ์ดกราฟ: แถบสีบางด้านบน + หัวข้อดูเป็นทางการขึ้น */
@@ -1360,16 +1360,34 @@ const DB = {
         <button class="btn-secondary" onclick="clearFilters()">✕ ล้างตัวกรอง</button>
       </div>
       <div class="card">
-        <div class="table-scroll">
+        <div class="table-scroll" id="normal-table-wrap">
           <table id="main-table">
             <thead>
               <tr>
                 <th>#</th><th>เลขที่ฎีกา</th><th>ประเภทงบ</th><th>เรื่อง</th>
                 <th>ผู้ส่ง</th><th>จำนวนเงินรวม (บาท)</th><th>หน่วยงาน</th>
-                <th>วันที่ส่ง</th><th>ปีงบ</th><th>สถานะ</th><th>รับฎีกา</th><th>การดำเนินการ</th>
+                <th>วันที่ส่ง</th><th>ปีงบ</th><th>สถานะ</th><th>รับฎีกา</th><th>Timeline</th><th>การดำเนินการ</th>
               </tr>
             </thead>
             <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="table-scroll" id="progress-table-wrap" style="display:none">
+          <table id="progress-table" style="min-width:920px">
+            <thead>
+              <tr style="background:#eaf7fb">
+                <th style="text-align:left;min-width:220px">งาน (เลขที่ฎีกา / เรื่อง)</th>
+                <th style="text-align:center">รับฎีกา</th>
+                <th style="text-align:center">ตรวจสอบแล้ว</th>
+                <th style="text-align:center">เสนอ ผอ.</th>
+                <th style="text-align:center">อนุมัติ</th>
+                <th style="text-align:center">เตรียมจ่าย</th>
+                <th style="text-align:center">จ่ายเงินแล้ว</th>
+                <th style="min-width:130px">ยังไม่เสร็จ (%)</th>
+                <th style="min-width:130px">เสร็จแล้ว (%)</th>
+              </tr>
+            </thead>
+            <tbody id="progress-table-body"></tbody>
           </table>
         </div>
       </div>
@@ -1428,7 +1446,7 @@ const DB = {
         <div class="card" style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column">
           <div class="card-header" style="flex-wrap:wrap;gap:10px">
             <span class="card-title">📊 สถานะฎีกาแยกตามหน่วยงาน</span>
-            <div id="unit-status-legend" style="display:flex;align-items:center;gap:12px;font-size:12px;flex-wrap:wrap"></div>
+            <div id="unit-status-legend" style="display:flex;align-items:center;gap:14px;font-size:14px;flex-wrap:wrap"></div>
           </div>
           <div class="card-body" id="status-chart" style="overflow-x:auto;padding:6px 10px;flex:1;display:flex"></div>
         </div>
@@ -1969,6 +1987,20 @@ const DB = {
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal('contract-modal')">ยกเลิก</button>
       <button class="btn-save" id="btn-save-contract" onclick="saveContract()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- โมดอลเช็คลิสต์สถานะฎีกา — ดูภาพรวมทุกขั้นตอนแบ่งตามบทบาทผู้รับผิดชอบ (อ่านอย่างเดียว) -->
+<div class="modal-overlay" id="checklist-modal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title" id="checklist-modal-title">เช็คลิสต์สถานะฎีกา</span>
+      <button class="btn-close" onclick="closeModal('checklist-modal')">×</button>
+    </div>
+    <div class="modal-body" id="checklist-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('checklist-modal')">ปิด</button>
     </div>
   </div>
 </div>
@@ -2530,6 +2562,7 @@ function applyFilters() {
   // เรียงข้อมูลจากปัจจุบัน (วันที่/เวลาส่งฎีกาล่าสุด) ขึ้นก่อนเสมอ
   filteredList.sort((a, b) => _sendDateSortKey(b.sendDate) - _sendDateSortKey(a.sendDate));
   renderTable(filteredList);
+  if (progressViewActive) renderProgressTable(filteredList);
 }
 
 function clearFilters() {
@@ -2575,13 +2608,15 @@ function renderTable(list) {
   const tbody = document.getElementById('table-body');
   document.getElementById('total-count').textContent = `รายการทั้งหมด ${list.length} รายการ`;
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="12" class="no-data">ไม่พบข้อมูล</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13" class="no-data">ไม่พบข้อมูล</td></tr>';
+    updateBulkBar();
     return;
   }
+  const canReceiveGlobal = canEditSection(2);
   tbody.innerHTML = list.map((d, i) => {
     const ls = getLatestStatus(d);
     const canEdit = !(getRoleList(currentUser.role).length && getRoleList(currentUser.role).every(r => r === 'ผู้บริหาร' || r === 'อื่นๆ'));
-    const canReceive = canEditSection(2); // เฉพาะ role "ผู้ตรวจฎีกา" (หรือ admin) เท่านั้นที่ติ๊ก/แก้ไขได้
+    const canReceive = canReceiveGlobal; // เฉพาะ role "ผู้ตรวจฎีกา" (หรือ admin) เท่านั้นที่ติ๊ก/แก้ไขได้
     return `<tr>
       <td>${i+1}</td>
       <td><b>${d.dikhaNo}</b></td>
@@ -2597,6 +2632,9 @@ function renderTable(list) {
         <input type="checkbox" ${d.status.received ? 'checked' : ''} ${!canReceive ? 'disabled' : ''}
           onchange="toggleReceivedInline('${d.id}', this.checked)" style="width:17px;height:17px;cursor:${canReceive?'pointer':'not-allowed'}">
       </td>
+      <td class="text-center">
+        <button class="btn-secondary" style="padding:5px 10px;font-size:12px;white-space:nowrap" onclick="openChecklistModal('${d.id}')" title="ดูไทม์ไลน์สถานะทั้งหมด">🕒 Timeline</button>
+      </td>
       <td>
         <div class="flex gap-8 items-center">
           <button class="btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openEditModal('${d.id}')">
@@ -2607,6 +2645,196 @@ function renderTable(list) {
       </td>
     </tr>`;
   }).join('');
+  updateBulkBar();
+}
+
+// ============================================================
+// มุมมองติดตามความคืบหน้า (แบบตัวติดตามความคืบหน้าโครงการ)
+// แถวคือฎีกาแต่ละใบ คอลัมน์คือขั้นตอนหลักเป็น checkbox ที่คลิกแก้ไขได้ทันที (เหมือนคอลัมน์ "รับฎีกา")
+// ============================================================
+let progressViewActive = false;
+
+// แผนที่ field สถานะ → เลขที่ส่วน (สำหรับเช็คสิทธิ์) + ชื่อฟิลด์วันที่/ผู้บันทึก ที่ต้องอัปเดตพร้อมกัน
+const STATUS_FIELD_MAP = {
+  received:  { section: 2, dateField: 'receivedDate',  byField: 'receivedBy', label: 'รับฎีกา' },
+  inspected: { section: 2, dateField: 'inspectedDate', label: 'ตรวจสอบแล้ว' },
+  proposed:  { section: 3, dateField: 'proposedDate',  label: 'เสนอ ผอ.' },
+  approved:  { section: 4, dateField: 'approvedDate',  label: 'อนุมัติ' },
+  prepPay:   { section: 9, dateField: 'prepPayDate',   label: 'เตรียมจ่าย' },
+  paid:      { section: 9, dateField: 'paidDate',      label: 'จ่ายเงินแล้ว' },
+};
+
+function toggleProgressView() {
+  progressViewActive = !progressViewActive;
+  const btn = document.getElementById('btn-toggle-progress-view');
+  document.getElementById('normal-table-wrap').style.display   = progressViewActive ? 'none' : '';
+  document.getElementById('progress-table-wrap').style.display = progressViewActive ? '' : 'none';
+  if (btn) btn.textContent = progressViewActive ? '🗂️ มุมมองตารางปกติ' : '✅ มุมมองติดตามความคืบหน้า';
+  if (progressViewActive) renderProgressTable(filteredList);
+}
+
+// ติ๊ก/ยกเลิกสถานะตรงจากตารางเลย ไม่ต้องเปิดฟอร์มฎีกา — บันทึกขึ้น Supabase ทันที (เหมือน toggleReceivedInline)
+async function toggleStatusInline(id, field, checked) {
+  const cfg = STATUS_FIELD_MAP[field];
+  if (!cfg) return;
+  if (!canEditSection(cfg.section)) {
+    showToast('⛔ คุณไม่มีสิทธิ์แก้ไขส่วนนี้', 'error');
+    if (progressViewActive) renderProgressTable(filteredList);
+    return;
+  }
+  const d = dikhaList.find(x => x.id === id);
+  if (!d) return;
+  const backup = { ...d.status };
+  d.status[field] = checked;
+  if (checked) {
+    d.status[cfg.dateField] = nowTH();
+    if (cfg.byField) d.status[cfg.byField] = currentUser.name;
+  }
+  persistAll();
+  try {
+    await DB.saveDikha(d);
+    applyFilters();
+    populateSearchList();
+    renderDashboard();
+    showToast(checked ? `บันทึก "${cfg.label}" แล้ว ✅` : `ยกเลิก "${cfg.label}"`, 'success');
+  } catch (e) {
+    console.error('[toggleStatusInline]', field, e);
+    d.status = backup;
+    persistAll();
+    applyFilters();
+    showToast('⚠️ บันทึกไม่สำเร็จ: ' + (e.message || 'unknown error'), 'error');
+  }
+}
+
+function renderProgressTable(list) {
+  const tbody = document.getElementById('progress-table-body');
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="no-data">ไม่พบข้อมูล</td></tr>';
+    return;
+  }
+  const cbCell = (d, field, done) => {
+    const cfg = STATUS_FIELD_MAP[field];
+    const canEdit = canEditSection(cfg.section);
+    return `<input type="checkbox" ${done ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}
+      onchange="toggleStatusInline('${d.id}','${field}', this.checked)"
+      style="width:22px;height:22px;cursor:${canEdit ? 'pointer' : 'not-allowed'};accent-color:#16294a">`;
+  };
+
+  tbody.innerHTML = list.map(d => {
+    const s = d.status || {};
+    const fields = ['received','inspected','proposed','approved','prepPay','paid'];
+    const doneCount  = fields.filter(f => !!s[f]).length;
+    const donePct    = Math.round(doneCount / fields.length * 100);
+    const notDonePct = 100 - donePct;
+    return `<tr>
+      <td style="text-align:left">
+        <div style="font-weight:700;color:var(--navy);font-size:13px">${d.dikhaNo}</div>
+        <div style="font-size:12px;color:var(--gray-500);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.subject}">${d.subject}</div>
+      </td>
+      ${fields.map(f => `<td style="text-align:center">${cbCell(d, f, !!s[f])}</td>`).join('')}
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <div style="flex:1;height:14px;background:#fdf1e9;border-radius:3px;overflow:hidden;display:flex;justify-content:flex-end">
+            <div style="width:${notDonePct}%;height:100%;background:linear-gradient(90deg,#fce3d0,#f2994a)"></div>
+          </div>
+          <span style="font-size:12.5px;font-weight:700;color:#d9772f;min-width:36px;text-align:right">${notDonePct}%</span>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:14px;background:#eaf5fb;border-radius:3px;overflow:hidden">
+            <div style="width:${donePct}%;height:100%;background:linear-gradient(90deg,#8fd3f0,#2f9bd6)"></div>
+          </div>
+          <span style="font-size:12.5px;font-weight:700;color:#1f7fb3;min-width:36px;text-align:right">${donePct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// เลือกหลายรายการพร้อมกัน — สำหรับ "รับฎีกา" ทีเดียวหลายฉบับ
+// (สะดวกกรณีส่งฎีกาครั้งเดียวแต่มีหลายหน่วยงาน/หลายฉบับพร้อมกัน)
+// ============================================================
+let selectedDikhaIds = new Set();
+
+function toggleRowSelect(id, checked) {
+  if (checked) selectedDikhaIds.add(id); else selectedDikhaIds.delete(id);
+  updateBulkBar();
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('.row-select-cb').forEach(cb => {
+    cb.checked = checked;
+    if (checked) selectedDikhaIds.add(cb.dataset.id); else selectedDikhaIds.delete(cb.dataset.id);
+  });
+  updateBulkBar();
+}
+
+function clearSelection() {
+  selectedDikhaIds.clear();
+  const selAll = document.getElementById('chk-select-all');
+  if (selAll) selAll.checked = false;
+  applyFilters();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  const countEl = document.getElementById('selected-count');
+  if (!bar || !countEl) return;
+  // ตัดรายการที่ถูกลบ/รับไปแล้วออกจาก selection (เผื่อข้อมูลเปลี่ยนระหว่างเปิดหน้าไว้)
+  const validIds = new Set(dikhaList.filter(d => !d.status.received).map(d => d.id));
+  [...selectedDikhaIds].forEach(id => { if (!validIds.has(id)) selectedDikhaIds.delete(id); });
+  countEl.textContent = selectedDikhaIds.size;
+  bar.style.display = selectedDikhaIds.size > 0 ? 'flex' : 'none';
+}
+
+async function bulkReceiveSelected() {
+  if (!canEditSection(2)) { showToast('⛔ เฉพาะผู้ตรวจฎีกาเท่านั้นที่แก้ไขส่วนนี้ได้', 'error'); return; }
+  const ids = [...selectedDikhaIds];
+  if (!ids.length) return;
+  let successCount = 0, failCount = 0;
+  for (const id of ids) {
+    const d = dikhaList.find(x => x.id === id);
+    if (!d || d.status.received) continue;
+    const backup = { ...d.status };
+    d.status.received = true;
+    d.status.receivedBy = currentUser.name;
+    d.status.receivedDate = nowTH();
+    try {
+      await DB.saveDikha(d);
+      successCount++;
+    } catch (e) {
+      console.error('[bulkReceiveSelected]', id, e);
+      d.status = backup;
+      failCount++;
+    }
+  }
+  persistAll();
+  selectedDikhaIds.clear();
+  applyFilters();
+  populateSearchList();
+  renderDashboard();
+  if (failCount === 0) {
+    showToast(`รับฎีกาแล้ว ${successCount} รายการ ✅`, 'success');
+  } else {
+    showToast(`รับฎีกาสำเร็จ ${successCount} รายการ, ล้มเหลว ${failCount} รายการ ⚠️`, 'error');
+  }
+}
+
+// ============================================================
+// เช็คลิสต์สถานะฎีกา (อ่านอย่างเดียว) — แบ่งตามบทบาทผู้รับผิดชอบแต่ละส่วน
+// ============================================================
+function openChecklistModal(id) {
+  const d = dikhaList.find(x => x.id === id);
+  if (!d) return;
+  const html = `<div style="margin-bottom:14px;padding:10px 14px;background:var(--gray-50);border-radius:8px;font-size:13px">
+    <b>เลขที่ฎีกา:</b> ${d.dikhaNo} &nbsp;|&nbsp; <b>เรื่อง:</b> ${d.subject}
+  </div>` + renderTimeline(d);
+  document.getElementById('checklist-modal-title').textContent = `ไทม์ไลน์สถานะฎีกา — ${d.dikhaNo}`;
+  document.getElementById('checklist-modal-body').innerHTML = html;
+  document.getElementById('checklist-modal').classList.add('open');
 }
 
 // 💡 ติ๊ก "รับฎีกา" ตรงจากตารางบัญชีคุมฯ ได้เลย ไม่ต้องเปิดหน้ารายละเอียด — บันทึกขึ้น Supabase ทันทีที่ติ๊ก
@@ -4439,13 +4667,13 @@ function renderChartsFromData(data) {
   // legend ปรับขนาดตัวหนังสือและกล่องสี่เหลี่ยม สถานะฎีกาแยกตามหน่วยงาน
   const legendEl = document.getElementById('unit-status-legend');
   if (legendEl) {
-    const totalItem = `<span style="display:inline-flex;align-items:center;gap:4px">
-      <span style="display:inline-block;width:10px;height:10px;background:#c4cadb;border-radius:2px;opacity:0.9"></span>
-      <span style="color:#3d4a66;font-size:12px">ฎีกาทั้งหมด</span></span>`;
+    const totalItem = `<span style="display:inline-flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:13px;height:13px;background:#c4cadb;border-radius:3px;opacity:0.9"></span>
+      <span style="color:#3d4a66;font-size:14.5px;font-weight:600">ฎีกาทั้งหมด</span></span>`;
     legendEl.innerHTML = STATUS_SERIES.map(s =>
-      `<span style="display:inline-flex;align-items:center;gap:4px">
-        <span style="display:inline-block;width:10px;height:10px;background:${s.color};border-radius:2px"></span>
-        <span style="color:#3d4a66;font-size:12px">${s.label}</span>
+      `<span style="display:inline-flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:13px;height:13px;background:${s.color};border-radius:3px"></span>
+        <span style="color:#3d4a66;font-size:14.5px;font-weight:600">${s.label}</span>
       </span>`).join('') + totalItem;
   }
 
@@ -4711,18 +4939,18 @@ function renderOverviewPie(total, paid, returned, cancelled) {
 
   const legend = `<div style="display:flex;flex-direction:column;gap:10px;min-width:150px">
     <div style="display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--gray-200)">
-      <span style="width:12px;height:12px;border-radius:3px;background:#9aa2b8;flex-shrink:0"></span>
-      <span style="font-size:13px;color:var(--navy);font-weight:700;flex:1">ฎีกาทั้งหมด</span>
-      <span style="font-size:13px;font-weight:700;color:#9aa2b8">${total}</span>
-      <span style="font-size:11px;color:#7a85a0;min-width:36px;text-align:right">100%</span>
+      <span style="width:14px;height:14px;border-radius:3px;background:#9aa2b8;flex-shrink:0"></span>
+      <span style="font-size:15px;color:var(--navy);font-weight:700;flex:1">ฎีกาทั้งหมด</span>
+      <span style="font-size:15px;font-weight:700;color:#9aa2b8">${total}</span>
+      <span style="font-size:13px;color:#7a85a0;min-width:36px;text-align:right">100%</span>
     </div>
     ${rings.map(s => {
       const pct = Math.round(s.value / total * 100);
       return `<div style="display:flex;align-items:center;gap:8px">
-        <span style="width:12px;height:12px;border-radius:3px;background:${s.color};flex-shrink:0"></span>
-        <span style="font-size:13px;color:var(--navy);font-weight:600;flex:1">${s.label}</span>
-        <span style="font-size:13px;font-weight:700;color:${s.color}">${s.value}</span>
-        <span style="font-size:11px;color:#7a85a0;min-width:36px;text-align:right">${pct}%</span>
+        <span style="width:14px;height:14px;border-radius:3px;background:${s.color};flex-shrink:0"></span>
+        <span style="font-size:15px;color:var(--navy);font-weight:600;flex:1">${s.label}</span>
+        <span style="font-size:15px;font-weight:700;color:${s.color}">${s.value}</span>
+        <span style="font-size:13px;color:#7a85a0;min-width:36px;text-align:right">${pct}%</span>
       </div>`;
     }).join('')}
   </div>`;

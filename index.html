@@ -149,8 +149,8 @@ const DB = {
       name:    r.name_th,
       position:r.position || '',
       unit:    r.unit_name || '',
-      token:   r.line_token || '',
-      idApi:   r.line_user_id || '',
+      token:   r.line_channel_token || '',
+      idApi:   r.line_group_id || '',
       email:   r.email || '',
       phone:   r.phone || '',
     }));
@@ -163,8 +163,8 @@ const DB = {
       name_th:      s.name,
       position:     s.position || '',
       unit_name:    s.unit || '',
-      line_token:   s.token || '',
-      line_user_id: s.idApi || '',
+      line_channel_token: s.token || '',
+      line_group_id:      s.idApi || '',
     }, null, 'id');
     lsSave(LS_KEYS.staff, staffList);
   },

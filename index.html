@@ -1580,12 +1580,12 @@ const DB = {
               <select id="sf-unit"><option value="">-- เลือกหน่วยงาน --</option></select>
             </div>
             <div class="form-field">
-              <label>Token API</label>
-              <input type="text" id="sf-token" placeholder="Token">
+              <label>Channel Token</label>
+              <input type="text" id="sf-token" placeholder="Channel Access Token ของ LINE Bot กลุ่มนี้">
             </div>
             <div class="form-field">
-              <label>ID API</label>
-              <input type="text" id="sf-id-api" placeholder="ID API">
+              <label>Group ID</label>
+              <input type="text" id="sf-id-api" placeholder="Group ID ของ LINE กลุ่มนี้">
             </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
@@ -1611,7 +1611,7 @@ const DB = {
             <thead>
               <tr>
                 <th>#</th><th>รหัส</th><th>ชื่อ - สกุล</th><th>ตำแหน่ง</th><th>หน่วยงาน</th>
-                <th class="admin-only-col" style="display:none">Token API</th>
+                <th class="admin-only-col" style="display:none">Channel Token</th>
                 <th id="staff-action-col">การดำเนินการ</th>
               </tr>
             </thead>
@@ -3828,8 +3828,8 @@ function _flexText(text, opts) {
 
 /**
  * ส่ง Push Message (Flex) ผ่าน LINE Messaging API
- * @param {string} userId       - LINE User ID ของผู้รับ (idApi ของ staff)
- * @param {string} channelToken - Channel Access Token ของ LINE Bot (token ของ staff)
+ * @param {string} userId       - LINE Group ID ของกลุ่มที่จะส่งเข้า (idApi ของ staff/หน่วยงาน)
+ * @param {string} channelToken - Channel Access Token ของ LINE Bot ประจำกลุ่มนั้น (token ของ staff/หน่วยงาน)
  * @param {object} flexMessage  - Flex Message object จาก buildFlexMessage()
  */
 async function sendLineFlexMessage(userId, channelToken, flexMessage) {
@@ -3892,13 +3892,13 @@ async function notifySenderOnStatusChange(d, statusLabel) {
     return;
   }
 
-  const channelToken = (staff.token || '').trim();  // Channel Access Token (Token API)
-  const userId       = (staff.idApi || '').trim();  // LINE User ID (ID API)
+  const channelToken = (staff.token || '').trim();  // Channel Access Token ของกลุ่ม LINE (Channel Token)
+  const userId       = (staff.idApi || '').trim();  // LINE Group ID ที่จะส่งข้อความเข้า (Group ID)
 
   if (!channelToken || !userId) {
     const missing = [];
-    if (!channelToken) missing.push('Token API');
-    if (!userId)       missing.push('ID API');
+    if (!channelToken) missing.push('Channel Token');
+    if (!userId)       missing.push('Group ID');
     console.warn('[LINE] เจ้าหน้าที่', senderName, 'ขาด:', missing.join(', '));
     showToast('⚠️ ' + senderName + ' ยังไม่มี ' + missing.join(' / ') + ' — กรุณาอัปเดตข้อมูลหน้าเจ้าหน้าที่', 'error');
     return;
@@ -4095,7 +4095,7 @@ async function testWarrantyReminderForContract(contractId) {
   const channelToken = (staff.token || '').trim();
   const userId = (staff.idApi || '').trim();
   if (!channelToken || !userId) {
-    const missing = [!channelToken && 'Token API', !userId && 'ID API'].filter(Boolean).join(' และ ');
+    const missing = [!channelToken && 'Channel Token', !userId && 'Group ID'].filter(Boolean).join(' และ ');
     showToast('⚠️ ทดสอบไม่ได้: ' + staff.name + ' ยังไม่มี ' + missing + ' — กรุณาไปเติมที่หน้าเจ้าหน้าที่ก่อน', 'error');
     return;
   }
@@ -5051,7 +5051,7 @@ function downloadStaffCSV() {
     showToast('ไม่มีข้อมูลเจ้าหน้าที่ให้ดาวน์โหลด', 'error');
     return;
   }
-  const headers = ['ลำดับ', 'รหัส', 'ชื่อ-สกุล', 'ตำแหน่ง', 'หน่วยงาน', 'Token API', 'ID API'];
+  const headers = ['ลำดับ', 'รหัส', 'ชื่อ-สกุล', 'ตำแหน่ง', 'หน่วยงาน', 'Channel Token', 'Group ID'];
   const escCSV = (val) => {
     const s = (val === undefined || val === null) ? '' : String(val);
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -5110,10 +5110,10 @@ function renderStaffTable(query) {
           <div class="form-field"><label>หน่วยงาน <span class="required">*</span></label>
             <select id="sf-edit-unit-${s.id}">${unitOptions(s.unit||'')}</select></div>
           ${isAdmin ? `
-          <div class="form-field"><label>Token API <span style="font-size:10px;color:var(--orange)">🔒 admin</span></label>
-            <input type="text" id="sf-edit-token-${s.id}" value="${s.token||''}" placeholder="Token"></div>
-          <div class="form-field"><label>ID API <span style="font-size:10px;color:var(--orange)">🔒 admin</span></label>
-            <input type="text" id="sf-edit-idapi-${s.id}" value="${s.idApi||''}" placeholder="ID API"></div>
+          <div class="form-field"><label>Channel Token <span style="font-size:10px;color:var(--orange)">🔒 admin</span></label>
+            <input type="text" id="sf-edit-token-${s.id}" value="${s.token||''}" placeholder="Channel Access Token"></div>
+          <div class="form-field"><label>Group ID <span style="font-size:10px;color:var(--orange)">🔒 admin</span></label>
+            <input type="text" id="sf-edit-idapi-${s.id}" value="${s.idApi||''}" placeholder="Group ID"></div>
           ` : `
           <input type="hidden" id="sf-edit-token-${s.id}" value="${s.token||''}">
           <input type="hidden" id="sf-edit-idapi-${s.id}" value="${s.idApi||''}">

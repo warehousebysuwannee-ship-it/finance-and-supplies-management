@@ -1553,7 +1553,10 @@ const DB = {
           <div class="page-title">รายชื่อเจ้าหน้าที่</div>
           <div class="page-subtitle">ข้อมูลเจ้าหน้าที่ผู้มีสิทธิ์ส่งฎีกา</div>
         </div>
-        <button class="btn-primary" onclick="openInlineStaffForm()" id="btn-add-staff" style="display:none">＋ เพิ่มเจ้าหน้าที่</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn-secondary" onclick="downloadStaffCSV()" id="btn-download-staff-csv" style="display:none">⬇️ ดาวน์โหลด CSV</button>
+          <button class="btn-primary" onclick="openInlineStaffForm()" id="btn-add-staff" style="display:none">＋ เพิ่มเจ้าหน้าที่</button>
+        </div>
       </div>
 
       <!-- ฟอร์มเพิ่ม inline (admin เท่านั้น) -->
@@ -2400,6 +2403,7 @@ function checkPermissions() {
   const canAdd = userHasAnyRole(currentUser, ['admin','เจ้าหน้าที่หน่วยงานที่ส่งฎีกา']);
   document.getElementById('btn-add-new').style.display = canAdd ? 'flex' : 'none';
   document.getElementById('btn-add-staff').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('btn-download-staff-csv').style.display = isAdmin ? 'flex' : 'none';
   document.getElementById('btn-add-recipient').style.display = 'flex';
   document.getElementById('tab-btn-users').style.display = isAdmin ? 'flex' : 'none';
 }
@@ -5037,6 +5041,38 @@ function renderDashboard() {
 // ============================================================
 // STAFF — inline table
 // ============================================================
+/** ดาวน์โหลดรายชื่อเจ้าหน้าที่เป็นไฟล์ CSV — จำกัดสิทธิ์เฉพาะ admin เท่านั้น */
+function downloadStaffCSV() {
+  if (!userHasRole(currentUser, 'admin')) {
+    showToast('⚠️ เฉพาะผู้ดูแลระบบ (admin) เท่านั้นที่ดาวน์โหลดได้', 'error');
+    return;
+  }
+  if (!staffList.length) {
+    showToast('ไม่มีข้อมูลเจ้าหน้าที่ให้ดาวน์โหลด', 'error');
+    return;
+  }
+  const headers = ['ลำดับ', 'รหัส', 'ชื่อ-สกุล', 'ตำแหน่ง', 'หน่วยงาน', 'Token API', 'ID API'];
+  const escCSV = (val) => {
+    const s = (val === undefined || val === null) ? '' : String(val);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const rows = staffList.map((s, i) => [
+    i + 1, s.id || '', s.name || '', s.position || '', s.unit || '', s.token || '', s.idApi || ''
+  ].map(escCSV).join(','));
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n'); // \uFEFF = BOM กันภาษาไทยเพี้ยนตอนเปิดด้วย Excel
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `รายชื่อเจ้าหน้าที่_${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📥 ดาวน์โหลด CSV สำเร็จ', 'success');
+}
+
 function renderStaffTable(query) {
   const isAdmin = userHasRole(currentUser, 'admin');
   const q = (query !== undefined ? query : (document.getElementById('staff-search')||{}).value || '').toLowerCase();

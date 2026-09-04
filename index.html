@@ -3698,7 +3698,7 @@ function gc(id) { const el = document.getElementById(id); return el ? el.checked
  */
 // 🔗 ลิงก์ปุ่ม "ไปที่หน้าเว็บ" ในข้อความแจ้งเตือน LINE
 // 👉 ถ้าต้องการเปลี่ยนลิงก์ปลายทางของปุ่ม แก้ไขค่าตัวแปรนี้บรรทัดเดียว (ตอนนี้เป็นลิงก์ชั่วคราว — เปลี่ยนเป็น URL เว็บแอปจริงบน GitHub Pages ทันทีที่มี)
-const FLEX_BUTTON_URL = 'https://drive.google.com/drive/folders/1AKKOmYo9zLrrtg7rSTnBKEO-5Ug_fMUh?usp=sharing';
+const FLEX_BUTTON_URL = 'https://warehousebysuwannee-ship-it.github.io/finance-and-supplies-management/';
 
 function buildFlexMessage(d, statusLabel, senderName) {
   const isReturn = statusLabel === 'ส่งคืนแก้ไข';
@@ -3809,7 +3809,7 @@ function _flexTimestamp() {
   };
 }
 
-/** helper: สร้างปุ่มยืนยัน/รับทราบ เต็มความกว้าง สีตามหัวข้อความ — กดแล้วส่งข้อความ "รับทราบสถานะ" กลับเข้าแชท (ไม่ต้องมี webhook ฝั่งเซิร์ฟเวอร์) */
+/** helper: สร้างปุ่มยืนยัน/รับทราบ เต็มความกว้าง สีตามหัวข้อความ — กดแล้วเปิดลิงก์เข้าเว็บแอป (FLEX_BUTTON_URL) ในเบราว์เซอร์ */
 function _flexAckButton(color, label) {
   return {
     type: 'button',
@@ -3817,7 +3817,7 @@ function _flexAckButton(color, label) {
     color,
     height: 'sm',
     margin: 'lg',
-    action: { type: 'message', label: label || 'รับทราบสถานะ', text: label || 'รับทราบสถานะ' }
+    action: { type: 'uri', label: label || 'รับทราบสถานะ', uri: _normalizeUrl(FLEX_BUTTON_URL) }
   };
 }
 
